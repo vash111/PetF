@@ -1,0 +1,100 @@
+.mypage-container {
+  display: flex;
+  height: 100vh;
+  font-family: 'Noto Sans', sans-serif;
+}
+
+.sidebar {
+  width: 250px;
+  background-color: #e0f2f1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar .logo {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.sidebar nav ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar nav ul li {
+  margin-bottom: 15px;
+}
+
+.sidebar nav ul li button {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  color: #333;
+  font-size: 16px;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.sidebar nav ul li button.active {
+  font-weight: bold;
+  color: #ffffff;
+  background-color: #00796b;
+  border-radius: 8px;
+}
+
+.content {
+  flex: 1;
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+.content h2 {
+  margin-bottom: 20px;
+  font-size: 24px;
+  color: #333;
+}
+
+.activity-card {
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 15px;
+}
+
+.inquiry-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.inquiry-card {
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.inquiry-date {
+  font-size: 14px;
+  color: #777;
+  margin-bottom: 10px;
+}
+
+.inquiry-content {
+  font-size: 16px;
+  color: #333;
+  line-height: 1.5;
+}
+
+.inquiry-reply {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-left: 4px solid #4caf50;
+  font-style: italic;
+}
