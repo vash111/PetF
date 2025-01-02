@@ -11,6 +11,7 @@ import VolunteerSearchPage from './pages/VolunteerSearchPage';
 import VolunteerCreatePage from './pages/VolunteerCreatePage';
 import ReviewBoardPage from './pages/ReviewBoardPage';
 import FreeBoardPage from './pages/FreeBoardPage';
+import FreeBoardDetailPage from './pages/FreeBoardDetailPage'
 import AdminPage from './pages/AdminPage';
 import NoticeBoard from './pages/NoticeBoard';
 import NoticeDetail from './pages/NoticeDetail';
@@ -37,6 +38,7 @@ function AppRouter({ isLoggedIn }) {
                     <Route path="/VolunteerCreatePage" element={isLoggedIn ? <VolunteerCreatePage /> : <HomePage />} />
                     <Route path="/ReviewBoardPage" element={<ReviewBoardPage />} />
                     <Route path="/FreeBoardPage" element={<FreeBoardPage />} />
+                    <Route path="/freeboard/:id" element={<FreeBoardDetailPage />} />
                     <Route path="/AdminPage" element={isLoggedIn ? <AdminPage /> : <HomePage />} />
                     <Route path="/notice-board" element={<NoticeBoard />} />
                     <Route path="/notice-detail/:id" element={<NoticeDetail />} />

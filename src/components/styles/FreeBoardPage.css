@@ -1,116 +1,138 @@
-.free-board-page {
-    padding: 20px;
-    max-width: 900px;
-    margin: 0 auto;
-    font-family: Arial, sans-serif;
+/* 기본적인 스타일 초기화 */
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
 }
 
 .centered {
     text-align: center;
-    font-size: 2rem;
+    margin: 20px 0;
+    font-size: 24px;
     font-weight: bold;
-    margin-bottom: 20px;
+    color: #4caf50;
 }
 
+/* 상단 바 스타일 */
 .top-bar {
     display: flex;
-    justify-content: space-between; /* 검색창과 글작성 버튼 분리 */
+    justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-}
-
-.search-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    padding: 10px 20px;
+    background-color: #4caf50;
+    color: #fff;
+    border-radius: 5px;
 }
 
 .search-input {
-    padding: 10px;
-    width: 300px;
+    padding: 8px;
     border: 1px solid #ddd;
     border-radius: 5px;
+    outline: none;
+    width: 300px;
+    font-size: 14px;
 }
 
-.search-button {
-    padding: 10px 20px;
-    background-color: #333;
-    color: white;
-    border: none;
+.search-input:focus {
+    border-color: #4caf50;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+}
+
+.search-button, .create-button {
+    padding: 10px 15px;
+    margin-left: 10px;
+    background-color: #fff;
+    border: 1px solid #4caf50;
     border-radius: 5px;
+    color: #4caf50;
+    font-size: 14px;
     cursor: pointer;
+    transition: background-color 0.3s;
 }
 
-.search-button:hover {
-    background-color: #555;
+.search-button:hover, .create-button:hover {
+    background-color: #388e3c;
+    color: #fff;
 }
 
-.create-button {
-    padding: 10px 20px;
-    background-color: #4caf50;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.create-button:hover {
-    background-color: #45a049;
-}
-
+/* 테이블 스타일 */
 .board-table {
     width: 100%;
+    margin: 20px auto;
     border-collapse: collapse;
-    margin-bottom: 20px;
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.board-table th,
-.board-table td {
-    border: 1px solid #ddd;
+.board-table th, .board-table td {
+    padding: 15px;
     text-align: center;
-    padding: 10px;
+    border-bottom: 1px solid #ddd;
 }
 
 .board-table th {
-    background-color: #f4f4f4;
+    background-color: #4caf50;
+    color: #fff;
+    font-weight: bold;
 }
 
-.board-table .title-column {
-    text-align: center;
-    width: 40%;
+.board-table tr:nth-child(even) {
+    background-color: #f2f2f2;
 }
 
+.board-table tr:hover {
+    background-color: #e8f5e9;
+    cursor: pointer;
+}
+
+.board-table button {
+    padding: 5px 10px;
+    border: none;
+    background-color: #4caf50;
+    color: white;
+    border-radius: 3px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.board-table button:hover {
+    background-color: #388e3c;
+}
+
+/* 페이지네이션 스타일 */
 .pagination {
     display: flex;
     justify-content: center;
-    gap: 5px;
+    margin: 20px 0;
 }
 
 .pagination button {
-    padding: 5px 10px;
-    border: 1px solid #333;
-    background-color: white;
-    color: #333;
-    cursor: pointer;
+    padding: 8px 12px;
+    margin: 0 5px;
+    border: 1px solid #4caf50;
     border-radius: 5px;
+    background-color: white;
+    color: #4caf50;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
 }
 
-.pagination button.active {
-    background-color: #333;
+.pagination button:hover, .pagination button.active {
+    background-color: #4caf50;
     color: white;
 }
 
-.pagination button:hover {
-    background-color: #555;
-    color: white;
-}
-
+/* 모달 스타일 */
 .modal {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     background: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
@@ -120,53 +142,57 @@
 .modal-content {
     background: white;
     padding: 20px;
-    border-radius: 10px;
-    width: 90%;
-    max-width: 500px;
+    border-radius: 5px;
+    width: 400px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     text-align: center;
 }
 
-.modal-content input,
-.modal-content select {
-    width: 100%;
-    margin-bottom: 10px;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+.modal-content h2 {
+    margin-bottom: 20px;
+    font-size: 20px;
+    color: #4caf50;
 }
 
-.save-button {
+.modal-content input, .modal-content select, .modal-content textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    outline: none;
+}
+
+.modal-content input:focus, .modal-content select:focus, .modal-content textarea:focus {
+    border-color: #4caf50;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+}
+
+.modal-content button {
+    padding: 10px 20px;
+    margin: 0 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.modal-content button:first-of-type {
     background-color: #4caf50;
     color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
 }
 
-.save-button:hover {
-    background-color: #45a049;
+.modal-content button:first-of-type:hover {
+    background-color: #388e3c;
 }
 
-.cancel-button {
-    background-color: #f44336;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+.modal-content button:last-of-type {
+    background-color: #ccc;
+    color: black;
 }
 
-.cancel-button:hover {
-    background-color: #e53935;
-}
-
-.content-textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    resize: none;
-    font-size: 1rem;
-    margin-top: 10px;
+.modal-content button:last-of-type:hover {
+    background-color: #999;
 }

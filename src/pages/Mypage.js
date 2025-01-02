@@ -1,23 +1,53 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../components/styles/MyPage.css';
 import apiClient from './../utils/apiClient';
 
 function MyPage() {
-  const [activeCategory, setActiveCategory] = useState('home'); // 현재 선택된 카테고리
-  const [inquiries, setInquiries] = useState([]); // 문의 내역 저장
+  const [activeCategory, setActiveCategory] = useState('home');
+  const [userInfo, setUserInfo] = useState(null);
+  const [myPosts, setMyPosts] = useState([]);
+  const [myComments, setMyComments] = useState([]);
+  const [likedPosts, setLikedPosts] = useState([]);
+  const [inquiries, setInquiries] = useState([]);
+  const navigate = useNavigate();
 
-  // 문의 내역 가져오기
   useEffect(() => {
-    if (activeCategory === 'myInquiries') {
-      const fetchInquiries = async () => {
-        try {
+    const fetchUserSession = async () => {
+      try {
+        const response = await apiClient.get('/api/users/session');
+        setUserInfo(response.data);
+      } catch (error) {
+        console.error('사용자 세션 불러오기 실패:', error.response?.data || error.message);
+      }
+    };
+
+    fetchUserSession();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (activeCategory === 'myPosts') {
+          const response = await apiClient.get('/api/mypage/myposts');
+          setMyPosts(response.data);
+        } else if (activeCategory === 'myComments') {
+          const response = await apiClient.get('/api/mypage/mycomments');
+          setMyComments(response.data);
+        } else if (activeCategory === 'likedPosts') {
+          const response = await apiClient.get('/api/mypage/likedposts');
+          setLikedPosts(response.data);
+        } else if (activeCategory === 'myInquiries') {
           const response = await apiClient.get('/api/inquiries');
           setInquiries(response.data);
-        } catch (error) {
-          console.error('문의 내역 불러오기 실패:', error.response?.data || error.message);
         }
-      };
-      fetchInquiries();
+      } catch (error) {
+        console.error(`${activeCategory} 데이터 불러오기 실패:`, error.response?.data || error.message);
+      }
+    };
+
+    if (activeCategory !== 'home' && activeCategory !== 'account') {
+      fetchData();
     }
   }, [activeCategory]);
 
@@ -25,74 +55,105 @@ function MyPage() {
     switch (activeCategory) {
       case 'home':
         return <h2>홈 화면</h2>;
+
       case 'account':
         return (
           <div>
             <h2>내 정보 관리</h2>
-            <p>회원 정보를 관리할 수 있습니다.</p>
-          </div>
-        );
-      case 'myPosts':
-        return (
-          <div>
-            <h2>내가 작성한 글</h2>
-            <p>내가 작성한 글 목록을 확인할 수 있습니다.</p>
-          </div>
-        );
-      case 'myComments':
-        return (
-          <div>
-            <h2>댓글 단 글</h2>
-            <div className="activity-card">
-              <p>08/10 03:23 - Lorem Ipsum</p>
-              <p>내용: 글230 | 나이: 29 - 40대</p>
-            </div>
-          </div>
-        );
-      case 'likedPosts':
-        return (
-          <div>
-            <h2>좋아요 표시한 글</h2>
-            <p>좋아요를 누른 글 목록을 확인할 수 있습니다.</p>
-          </div>
-        );
-      case 'myVolunteer':
-        return (
-          <div>
-            <h2>나의 봉사 활동 내역</h2>
-            <ul>
-              <li>2024-01-15: 유기동물 보호소 청소</li>
-              <li>2024-02-20: 유기견 산책 도우미</li>
-              <li>2024-03-10: 고양이 보호소 음식 준비</li>
-            </ul>
-          </div>
-        );
-      case 'myInquiries': // 새로운 카테고리 추가
-        return (
-          <div>
-            <h2>나의 문의 내역</h2>
-            {inquiries.length === 0 ? (
-              <p>문의 내역이 없습니다.</p>
-            ) : (
-              <div className="inquiry-list">
-                {inquiries.map((inquiry) => (
-                  <div key={inquiry.id} className="inquiry-card">
-                    <p className="inquiry-date">
-                      <strong>날짜:</strong> {new Date(inquiry.createdAt).toLocaleDateString()}
-                    </p>
-                    <p className="inquiry-content">
-                      <strong>내용:</strong> {inquiry.content}
-                    </p>
-                    {inquiry.reply && (
-                <p className="inquiry-reply">
-                  <strong>관리자 답변:</strong> {inquiry.reply}
-                </p>)}
-                  </div>
-                ))}
+            {userInfo ? (
+              <div className="list-container">
+                <div className="list-item">
+                  <div className="list-item-title">이름</div>
+                  <div className="list-item-content">{userInfo.username}</div>
+                </div>
+                <div className="list-item">
+                  <div className="list-item-title">이메일</div>
+                  <div className="list-item-content">{userInfo.email}</div>
+                </div>
+                <div className="list-item">
+                  <div className="list-item-title">가입일</div>
+                  <div className="list-item-content">{new Date(userInfo.createdAt).toLocaleDateString()}</div>
+                </div>
               </div>
+            ) : (
+              <p>정보를 불러오는 중...</p>
             )}
           </div>
         );
+
+      case 'myPosts':
+      case 'myComments':
+      case 'likedPosts':
+        const items = activeCategory === 'myPosts'
+          ? myPosts
+          : activeCategory === 'myComments'
+          ? myComments
+          : likedPosts;
+
+        return (
+          <div>
+            <h2>
+              {activeCategory === 'myPosts'
+                ? '내가 작성한 글'
+                : activeCategory === 'myComments'
+                ? '댓글 단 글'
+                : '좋아요 표시한 글'}
+            </h2>
+            <div className="list-container">
+              {items.length === 0 ? (
+                <p>목록이 비어 있습니다.</p>
+              ) : (
+                items.map((item) => (
+                  <div
+                    key={item.id}
+                    className="list-item"
+                    onClick={() =>
+                      navigate(
+                        `/freeboard/${
+                          item.postId || item.id
+                        }`
+                      )
+                    }
+                  >
+                    <div className="list-item-title">{item.title || item.postTitle}</div>
+                    <div className="list-item-content">{item.content}</div>
+                    <div className="list-item-date">
+                      {new Date(item.createdAt).toLocaleDateString()}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        );
+
+      case 'myInquiries':
+        return (
+          <div>
+            <h2>나의 문의 내역</h2>
+            <div className="list-container">
+              {inquiries.length === 0 ? (
+                <p>문의 내역이 없습니다.</p>
+              ) : (
+                inquiries.map((inquiry) => (
+                  <div key={inquiry.id} className="list-item">
+                    <div className="list-item-title">문의 내용</div>
+                    <div className="list-item-content">{inquiry.content}</div>
+                    <div className="list-item-date">
+                      작성일: {new Date(inquiry.createdAt).toLocaleDateString()}
+                    </div>
+                    {inquiry.reply && (
+                      <div className="list-item-content">
+                        <strong>관리자 답변:</strong> {inquiry.reply}
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        );
+
       default:
         return <h2>잘못된 카테고리</h2>;
     }
@@ -100,7 +161,6 @@ function MyPage() {
 
   return (
     <div className="mypage-container">
-      {/* 왼쪽 사이드바 */}
       <div className="sidebar">
         <div className="logo">My Page</div>
         <nav>
@@ -147,14 +207,6 @@ function MyPage() {
             </li>
             <li>
               <button
-                className={activeCategory === 'myVolunteer' ? 'active' : ''}
-                onClick={() => setActiveCategory('myVolunteer')}
-              >
-                나의 봉사 활동 내역
-              </button>
-            </li>
-            <li>
-              <button
                 className={activeCategory === 'myInquiries' ? 'active' : ''}
                 onClick={() => setActiveCategory('myInquiries')}
               >
@@ -164,8 +216,6 @@ function MyPage() {
           </ul>
         </nav>
       </div>
-
-      {/* 메인 콘텐츠 */}
       <div className="content">{renderContent()}</div>
     </div>
   );

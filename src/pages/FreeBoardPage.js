@@ -1,7 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { UserContext } from '../App';
 import '../components/styles/FreeBoardPage.css';
+import apiClient from '../utils/apiClient';
 
-function FreeBoardPage({ loggedInUser }) {
+function FreeBoardPage() {
+    const { isLoggedIn, userInfo } = useContext(UserContext);
     const [posts, setPosts] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
@@ -9,6 +13,21 @@ function FreeBoardPage({ loggedInUser }) {
     const [isEditMode, setIsEditMode] = useState(false);
     const [currentPost, setCurrentPost] = useState(null);
     const itemsPerPage = 5;
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        fetchPosts();
+    }, []);
+
+    const fetchPosts = async () => {
+        try {
+            const response = await apiClient.get('/api/freeboard');
+            const sortedPosts = response.data.sort((a, b) => b.id - a.id);
+            setPosts(sortedPosts);
+        } catch (error) {
+            console.error('게시글을 가져오는 중 오류 발생:', error);
+        }
+    };
 
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value);
@@ -18,13 +37,54 @@ function FreeBoardPage({ loggedInUser }) {
         setCurrentPage(page);
     };
 
+    const handlePostClick = async (postId) => {
+        try {
+            await apiClient.post(`/api/freeboard/${postId}/view`);
+            navigate(`/freeboard/${postId}`);
+        } catch (error) {
+            console.error('조회수 증가 실패:', error);
+        }
+    };
+
+    const handleLikePost = async (postId) => {
+        try {
+            const updatedPosts = posts.map((post) => {
+                if (post.id === postId) {
+                    const wasLiked = post.likedByUser;
+                    return {
+                        ...post,
+                        likes: wasLiked ? post.likes - 1 : post.likes + 1,
+                        likedByUser: !wasLiked,
+                    };
+                }
+                return post;
+            });
+
+            setPosts(updatedPosts);
+
+            await apiClient.post(`/api/freeboard/${postId}/like`);
+        } catch (error) {
+            console.error('좋아요 토글 실패:', error);
+        }
+    };
+
     const handleOpenModal = (post = null) => {
+        if (!isLoggedIn) {
+            alert('로그인이 필요합니다.');
+            return;
+        }
+
         if (post) {
             setIsEditMode(true);
             setCurrentPost(post);
         } else {
             setIsEditMode(false);
-            setCurrentPost({ title: '', category: '잡담', content: '', author: loggedInUser, views: 0 });
+            setCurrentPost({
+                title: '',
+                category: '잡담',
+                content: '',
+                authorUsername: userInfo?.username,
+            });
         }
         setIsModalOpen(true);
     };
@@ -39,23 +99,22 @@ function FreeBoardPage({ loggedInUser }) {
         setCurrentPost((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleSavePost = () => {
-        if (isEditMode) {
-            setPosts((prev) =>
-                prev.map((post) => (post.id === currentPost.id ? currentPost : post))
-            );
-        } else {
-            setPosts((prev) => [
-                ...prev,
-                { ...currentPost, id: prev.length + 1, date: 'DB에서 받아올 예정' },
-            ]);
+    const handleSavePost = async () => {
+        if (!currentPost.title.trim() || !currentPost.content.trim()) {
+            alert('제목과 내용을 모두 입력하세요.');
+            return;
         }
-        handleCloseModal();
-    };
 
-    const handleDeletePost = (id) => {
-        if (window.confirm('정말 삭제하시겠습니까?')) {
-            setPosts((prev) => prev.filter((post) => post.id !== id));
+        try {
+            if (isEditMode) {
+                await apiClient.put(`/api/freeboard/${currentPost.id}`, currentPost);
+            } else {
+                await apiClient.post('/api/freeboard', currentPost);
+            }
+            fetchPosts();
+            handleCloseModal();
+        } catch (error) {
+            console.error('게시글 저장 중 오류 발생:', error);
         }
     };
 
@@ -92,41 +151,26 @@ function FreeBoardPage({ loggedInUser }) {
                         <th>번호</th>
                         <th>제목</th>
                         <th>카테고리</th>
-                        <th>이름</th>
+                        <th>작성자</th>
                         <th>조회수</th>
-                        <th> </th>
+                        <th>좋아요</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {currentPosts.length > 0 ? (
-                        currentPosts.map((post, index) => (
-                            <tr key={index}>
-                                <td>{startIndex + index + 1}</td>
-                                <td>{post.title}</td>
-                                <td>{post.category}</td>
-                                <td>{post.author}</td>
-                                <td>{post.views}</td>
-                                <td>
-                                    <button
-                                        onClick={() => handleOpenModal(post)}
-                                        className="edit-button"
-                                    >
-                                        수정
-                                    </button>
-                                    <button
-                                        onClick={() => handleDeletePost(post.id)}
-                                        className="delete-button"
-                                    >
-                                        삭제
-                                    </button>
-                                </td>
-                            </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan="6">게시글이 없습니다.</td>
+                    {currentPosts.map((post, index) => (
+                        <tr key={post.id}>
+                            <td>{startIndex + index + 1}</td>
+                            <td onClick={() => handlePostClick(post.id)}>{post.title}</td>
+                            <td>{post.category || '미지정'}</td>
+                            <td>{post.authorUsername}</td>
+                            <td>{post.views}</td>
+                            <td>
+                                <button onClick={() => handleLikePost(post.id)}>
+                                    좋아요 ({post.likes || 0})
+                                </button>
+                            </td>
                         </tr>
-                    )}
+                    ))}
                 </tbody>
             </table>
             <div className="pagination">
@@ -166,14 +210,9 @@ function FreeBoardPage({ loggedInUser }) {
                             value={currentPost.content}
                             onChange={handleInputChange}
                             rows="5"
-                            className="content-textarea"
                         ></textarea>
-                        <button onClick={handleSavePost} className="save-button">
-                            저장
-                        </button>
-                        <button onClick={handleCloseModal} className="cancel-button">
-                            취소
-                        </button>
+                        <button onClick={handleSavePost}>저장</button>
+                        <button onClick={handleCloseModal}>취소</button>
                     </div>
                 </div>
             )}

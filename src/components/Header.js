@@ -52,7 +52,7 @@ function Header() {
           '/ReviewBoardPage',
           '/CustomerSupport',
           '/notice-board',
-          '/AboutPage'
+          '/AboutPage',
         ];
 
         const dynamicPaths = [/^\/notice-detail\/\d+$/]; // 동적 경로 정규식 추가
