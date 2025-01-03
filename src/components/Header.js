@@ -33,7 +33,35 @@ function Header() {
     confirmPassword: '',
     name: '',
     phoneNumber: '',
+    sido: '',
+    sigungu: '',
   });
+
+  const [sidoList] = useState([
+    { code: '6110000', name: '서울특별시' },
+    { code: '6260000', name: '부산광역시' },
+    { code: '6270000', name: '대구광역시' },
+  ]);
+
+  const [sigunguData] = useState({
+    '6110000': [
+      { code: '1101', name: '종로구' },
+      { code: '1102', name: '중구' },
+      { code: '1103', name: '용산구' },
+    ],
+    '6260000': [
+      { code: '2601', name: '중구' },
+      { code: '2602', name: '서구' },
+      { code: '2603', name: '동구' },
+    ],
+    '6270000': [
+      { code: '2701', name: '중구' },
+      { code: '2702', name: '동구' },
+      { code: '2703', name: '서구' },
+    ],
+  });
+
+  const [sigunguList, setSigunguList] = useState([]);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -91,6 +119,11 @@ function Header() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (name === 'sido') {
+      setFormData((prev) => ({ ...prev, sigungu: '' })); // 시군구 초기화
+      setSigunguList(sigunguData[value] || []);
+    }
   };
 
   const handleLogin = async (e) => {
@@ -123,6 +156,8 @@ function Header() {
         password: formData.password,
         name: formData.name,
         phoneNumber: formData.phoneNumber,
+        sido: formData.sido,
+        sigungu: formData.sigungu,
       });
       console.log('회원가입 성공:', response.data);
       alert('회원가입 성공! 로그인 해주세요.');
@@ -319,6 +354,41 @@ function Header() {
                   required
                 />
               </Form.Group>
+              <Form.Group controlId="formSignupSido" className="mb-3">
+                <Form.Label className="text-start d-block">시도</Form.Label>
+                <Form.Control
+                  as="select"
+                  name="sido"
+                  value={formData.sido}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">시도를 선택하세요</option>
+                  {sidoList.map((sido) => (
+                    <option key={sido.code} value={sido.code}>
+                      {sido.name}
+                    </option>
+                  ))}
+                </Form.Control>
+              </Form.Group>
+              <Form.Group controlId="formSignupSigungu" className="mb-3">
+                <Form.Label className="text-start d-block">시군구</Form.Label>
+                <Form.Control
+                  as="select"
+                  name="sigungu"
+                  value={formData.sigungu}
+                  onChange={handleChange}
+                  disabled={!formData.sido}
+                  required
+                >
+                  <option value="">시군구를 선택하세요</option>
+                  {sigunguList.map((sigungu) => (
+                    <option key={sigungu.code} value={sigungu.code}>
+                      {sigungu.name}
+                    </option>
+                  ))}
+                </Form.Control>
+              </Form.Group>
               <Button variant="success" type="submit" className="w-100">
                 회원 가입
               </Button>
@@ -331,3 +401,4 @@ function Header() {
 }
 
 export default Header;
+

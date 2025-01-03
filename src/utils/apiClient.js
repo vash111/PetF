@@ -29,6 +29,8 @@ export const setupInterceptors = (navigate) => {
                     '/api/public/notices', // 공지사항 경로
                     '/notice-board',
                     '/notice-detail',
+                    '/api/regions/sido',
+                    '/api/regions/sigungu',
                 ];
 
                 if (status === 401 && !noAuthPaths.some((path) => url.includes(path))) {

@@ -1,59 +1,61 @@
-import React, { useState } from 'react'; // useEffect 제거
+import React, { useState } from 'react';
+import axios from 'axios';
 import '../components/styles/AnimalSearchPage.css';
 
 function AnimalSearchPage() {
-    const [animals, setAnimals] = useState([
-        {
-            id: 1,
-            image: 'https://via.placeholder.com/100',
-            title: '강아지 - 서울특별시',
-            date: '2024-01-01',
-        },
-        {
-            id: 2,
-            image: 'https://via.placeholder.com/100',
-            title: '고양이 - 부산광역시',
-            date: '2024-01-02',
-        },
-        {
-            id: 3,
-            image: 'https://via.placeholder.com/100',
-            title: '기타 - 경기도',
-            date: '2024-01-03',
-        },
-    ]); // 임시 데이터
+    const [animals, setAnimals] = useState([]);
     const [filters, setFilters] = useState({
-        region: '',
-        type: '',
-        date: '',
-    }); // 검색 필터 상태
-    const [currentPage, setCurrentPage] = useState(1); // 현재 페이지
-    const itemsPerPage = 5; // 페이지당 표시할 항목 수
+        bgnde: '', // 검색 시작일
+        endde: '', // 검색 종료일
+        upkind: '', // 축종코드
+        upr_cd: '', // 시도코드
+        org_cd: '', // 시군구코드
+        state: '', // 상태
+        neuter_yn: '', // 중성화 여부
+    });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
-    // useEffect(() => {
-    //     fetchData();
-    // }, []);
+    const API_KEY = process.env.REACT_APP_ANIMAL_API_KEY; // 디코딩된 API 키
 
-    // const fetchData = async () => {
-    //     try {
-    //         const response = await axios.get('https://your-api-endpoint.com/animals');
-    //         setAnimals(response.data);
-    //     } catch (error) {
-    //         console.error('데이터를 가져오는 중 오류 발생:', error);
-    //     }
-    // };
+    const handleSearch = async () => {
+        setLoading(true);
+        setError(null);
 
-    // const handleSearch = async () => {
-    //     try {
-    //         const response = await axios.get('https://your-api-endpoint.com/animals', {
-    //             params: filters,
-    //         });
-    //         setAnimals(response.data);
-    //         setCurrentPage(1); // 검색 시 페이지 초기화
-    //     } catch (error) {
-    //         console.error('검색 중 오류 발생:', error);
-    //     }
-    // };
+        try {
+            const params = {
+                serviceKey: API_KEY, // 디코딩된 키 사용
+                bgnde: filters.bgnde?.replace(/-/g, '') || '',
+                endde: filters.endde?.replace(/-/g, '') || '',
+                upkind: filters.upkind || '',
+                upr_cd: filters.upr_cd || '',
+                org_cd: filters.org_cd || '',
+                state: filters.state || '',
+                neuter_yn: filters.neuter_yn || '',
+                _type: 'json',
+                pageNo: 1,
+                numOfRows: 10,
+            };
+
+            const response = await axios.get(
+                'http://apis.data.go.kr/1543061/abandonmentPublicSrvc/abandonmentPublic',
+                { params }
+            );
+
+            const body = response?.data?.response?.body;
+            if (body?.items?.item) {
+                setAnimals(body.items.item);
+            } else {
+                setAnimals([]);
+                setError('데이터가 없습니다.');
+            }
+        } catch (err) {
+            console.error('데이터를 가져오는 중 오류 발생:', err);
+            setError('데이터를 가져오는 중 오류가 발생했습니다.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -63,79 +65,70 @@ function AnimalSearchPage() {
         }));
     };
 
-    const handlePageChange = (page) => {
-        setCurrentPage(page);
-    };
-
-    // 페이징 처리
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const currentItems = animals.slice(startIndex, startIndex + itemsPerPage);
-    const totalPages = Math.ceil(animals.length / itemsPerPage);
-
     return (
         <div className="animal-search-page">
             <h1>유기동물 조회</h1>
 
-            {/* 검색창 */}
+            {/* 검색 필터 */}
             <div className="search-bar">
-                <select name="region" onChange={handleInputChange}>
-                    <option value="">지역 선택</option>
-                    <option value="서울특별시">서울특별시</option>
-                    <option value="부산광역시">부산광역시</option>
-                    <option value="대구광역시">대구광역시</option>
-                    <option value="인천광역시">인천광역시</option>
-                    <option value="광주광역시">광주광역시</option>
-                    <option value="대전광역시">대전광역시</option>
-                    <option value="울산광역시">울산광역시</option>
-                    <option value="세종특별자치시">세종특별자치시</option>
-                    <option value="경기도">경기도</option>
-                    <option value="강원도">강원도</option>
-                    <option value="충청북도">충청북도</option>
-                    <option value="충청남도">충청남도</option>
-                    <option value="전라북도">전라북도</option>
-                    <option value="전라남도">전라남도</option>
-                    <option value="경상북도">경상북도</option>
-                    <option value="경상남도">경상남도</option>
-                    <option value="제주특별자치도">제주특별자치도</option>
-                </select>
-                <select name="type" onChange={handleInputChange}>
-                    <option value="">종류</option>
-                    <option value="강아지">강아지</option>
-                    <option value="고양이">고양이</option>
-                    <option value="기타">기타</option>
-                </select>
                 <input
                     type="date"
-                    name="date"
+                    name="bgnde"
                     onChange={handleInputChange}
-                    placeholder="날짜 선택"
+                    placeholder="검색 시작일"
                 />
-                <button>검색</button> {/* handleSearch 제거 */}
+                <input
+                    type="date"
+                    name="endde"
+                    onChange={handleInputChange}
+                    placeholder="검색 종료일"
+                />
+                <select name="upkind" onChange={handleInputChange}>
+                    <option value="">종류</option>
+                    <option value="417000">강아지</option>
+                    <option value="422400">고양이</option>
+                    <option value="429900">기타</option>
+                </select>
+                <select name="upr_cd" onChange={handleInputChange}>
+                    <option value="">시도 선택</option>
+                    <option value="6110000">서울특별시</option>
+                    <option value="6260000">부산광역시</option>
+                    <option value="6270000">대구광역시</option>
+                </select>
+                <select name="state" onChange={handleInputChange}>
+                    <option value="">상태</option>
+                    <option value="notice">공고중</option>
+                    <option value="protect">보호중</option>
+                </select>
+                <select name="neuter_yn" onChange={handleInputChange}>
+                    <option value="">중성화 여부</option>
+                    <option value="Y">예</option>
+                    <option value="N">아니오</option>
+                    <option value="U">미상</option>
+                </select>
+                <button onClick={handleSearch}>검색</button>
             </div>
+
+            {/* 로딩 상태 */}
+            {loading && <p>로딩 중...</p>}
+
+            {/* 에러 메시지 */}
+            {error && <p className="error">{error}</p>}
 
             {/* 유기동물 목록 */}
             <div className="animal-list">
-                {currentItems.map((animal) => (
-                    <div key={animal.id} className="animal-item">
-                        <img src={animal.image} alt={animal.title} className="animal-image" />
+                {animals.map((animal) => (
+                    <div key={animal.desertionNo} className="animal-item">
+                        <img src={animal.popfile} alt={animal.kindCd} className="animal-image" />
                         <div className="animal-info">
-                            <h3>{animal.title}</h3>
-                            <p>{animal.date}</p>
+                            <h3>{animal.kindCd}</h3>
+                            <p>발견 장소: {animal.happenPlace}</p>
+                            <p>접수일: {animal.happenDt}</p>
+                            <p>보호소: {animal.careNm}</p>
+                            <p>보호소 주소: {animal.careAddr}</p>
+                            <p>연락처: {animal.careTel}</p>
                         </div>
                     </div>
-                ))}
-            </div>
-
-            {/* 페이징 */}
-            <div className="pagination">
-                {Array.from({ length: totalPages }, (_, index) => (
-                    <button
-                        key={index + 1}
-                        onClick={() => handlePageChange(index + 1)}
-                        className={currentPage === index + 1 ? 'active' : ''}
-                    >
-                        {index + 1}
-                    </button>
                 ))}
             </div>
         </div>
