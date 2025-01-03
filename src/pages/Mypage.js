@@ -59,21 +59,21 @@ function MyPage() {
       case 'account':
         return (
           <div>
-            <h2>내 정보 관리</h2>
+            <h2>내 정보</h2>
             {userInfo ? (
-              <div className="list-container">
-                <div className="list-item">
-                  <div className="list-item-title">이름</div>
-                  <div className="list-item-content">{userInfo.username}</div>
-                </div>
-                <div className="list-item">
-                  <div className="list-item-title">이메일</div>
-                  <div className="list-item-content">{userInfo.email}</div>
-                </div>
-                <div className="list-item">
-                  <div className="list-item-title">가입일</div>
-                  <div className="list-item-content">{new Date(userInfo.createdAt).toLocaleDateString()}</div>
-                </div>
+              <div className="user-info">
+                <p>
+                  <strong>이름:</strong> {userInfo.username}
+                </p>
+                <p>
+                  <strong>이메일:</strong> {userInfo.email}
+                </p>
+                <p>
+                  <strong>전화번호:</strong> {userInfo.phoneNumber || '등록되지 않음'}
+                </p>
+                <p>
+                  <strong>가입일:</strong> {new Date(userInfo.createdAt).toLocaleDateString()}
+                </p>
               </div>
             ) : (
               <p>정보를 불러오는 중...</p>
@@ -99,14 +99,14 @@ function MyPage() {
                 ? '댓글 단 글'
                 : '좋아요 표시한 글'}
             </h2>
-            <div className="list-container">
+            <div className="grid-container">
               {items.length === 0 ? (
                 <p>목록이 비어 있습니다.</p>
               ) : (
                 items.map((item) => (
                   <div
                     key={item.id}
-                    className="list-item"
+                    className="grid-item"
                     onClick={() =>
                       navigate(
                         `/freeboard/${
@@ -115,9 +115,9 @@ function MyPage() {
                       )
                     }
                   >
-                    <div className="list-item-title">{item.title || item.postTitle}</div>
-                    <div className="list-item-content">{item.content}</div>
-                    <div className="list-item-date">
+                    <div className="grid-item-title">{item.title || item.postTitle}</div>
+                    <div className="grid-item-content">{item.content}</div>
+                    <div className="grid-item-date">
                       {new Date(item.createdAt).toLocaleDateString()}
                     </div>
                   </div>
@@ -194,7 +194,7 @@ function MyPage() {
                 className={activeCategory === 'myComments' ? 'active' : ''}
                 onClick={() => setActiveCategory('myComments')}
               >
-                댓글 단 글
+                내가 쓴 댓글 확인
               </button>
             </li>
             <li>

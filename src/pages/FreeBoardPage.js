@@ -84,6 +84,7 @@ function FreeBoardPage() {
                 category: '잡담',
                 content: '',
                 authorUsername: userInfo?.username,
+                createdAt: new Date().toISOString(), // 작성 시간 추가
             });
         }
         setIsModalOpen(true);
@@ -109,7 +110,7 @@ function FreeBoardPage() {
             if (isEditMode) {
                 await apiClient.put(`/api/freeboard/${currentPost.id}`, currentPost);
             } else {
-                await apiClient.post('/api/freeboard', currentPost);
+                await apiClient.post('/api/freeboard', currentPost); // 새 글 작성 시 createdAt 포함
             }
             fetchPosts();
             handleCloseModal();
@@ -132,7 +133,7 @@ function FreeBoardPage() {
             <div className="top-bar">
                 <input
                     type="text"
-                    placeholder="검색어를 입력해주세요."
+                    placeholder="제목으로 검색해주세요."
                     value={searchTerm}
                     onChange={handleSearchChange}
                     className="search-input"
@@ -152,8 +153,9 @@ function FreeBoardPage() {
                         <th>제목</th>
                         <th>카테고리</th>
                         <th>작성자</th>
+                        <th>작성일</th>
                         <th>조회수</th>
-                        <th>좋아요</th>
+                        <th>추천</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -163,10 +165,11 @@ function FreeBoardPage() {
                             <td onClick={() => handlePostClick(post.id)}>{post.title}</td>
                             <td>{post.category || '미지정'}</td>
                             <td>{post.authorUsername}</td>
+                            <td>{new Date(post.createdAt).toLocaleString()}</td> {/* 작성 시간 표시 */}
                             <td>{post.views}</td>
                             <td>
                                 <button onClick={() => handleLikePost(post.id)}>
-                                    좋아요 ({post.likes || 0})
+                                    👍 {post.likes || 0}
                                 </button>
                             </td>
                         </tr>
